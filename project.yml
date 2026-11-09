@@ -1,0 +1,47 @@
+name: WindowList
+options:
+  bundleIdPrefix: io.elkin
+  deploymentTarget:
+    macOS: "26.0"
+  createIntermediateGroups: true
+packages:
+  WindowListCore:
+    path: .
+settings:
+  base:
+    SWIFT_VERSION: "6"
+    SWIFT_STRICT_CONCURRENCY: complete
+    SWIFT_APPROACHABLE_CONCURRENCY: YES
+    SWIFT_DEFAULT_ACTOR_ISOLATION: MainActor
+    MACOSX_DEPLOYMENT_TARGET: "26.0"
+targets:
+  WindowList:
+    type: application
+    platform: macOS
+    sources:
+      - path: App
+    dependencies:
+      - package: WindowListCore
+        product: WindowListCore
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: WindowList
+        LSUIElement: true
+        LSMinimumSystemVersion: "26.0"
+        NSPrincipalClass: NSApplication
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: io.elkin.WindowList
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_APP_SANDBOX: NO
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        GENERATE_INFOPLIST_FILE: NO
+schemes:
+  WindowList:
+    build:
+      targets:
+        WindowList: all
+    run:
+      config: Debug
