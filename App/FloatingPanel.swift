@@ -19,23 +19,14 @@ final class FloatingPanel: NSPanel {
         isReleasedWhenClosed = false
         minSize = NSSize(width: 200, height: 160)
 
-        let background = NSVisualEffectView()
-        background.material = .menu
-        background.blendingMode = .behindWindow
-        background.state = .active
-        background.maskImage = PanelStyle.cornerMask()
+        let background = NSGlassEffectView()
+        background.style = .regular
+        background.cornerRadius = PanelStyle.cornerRadius
         let hosting = NSHostingView(rootView: content)
         // The panel's height follows the content through `PanelFrame.fit`; SwiftUI's default min/ideal/max size
         // constraints would otherwise force it, e.g. to the wrapped permission text's height at zero width.
         hosting.sizingOptions = []
-        hosting.translatesAutoresizingMaskIntoConstraints = false
-        background.addSubview(hosting)
-        NSLayoutConstraint.activate([
-            hosting.leadingAnchor.constraint(equalTo: background.leadingAnchor),
-            hosting.trailingAnchor.constraint(equalTo: background.trailingAnchor),
-            hosting.topAnchor.constraint(equalTo: background.topAnchor),
-            hosting.bottomAnchor.constraint(equalTo: background.bottomAnchor),
-        ])
+        background.contentView = hosting
         contentView = background
         if !setFrameUsingName(Self.autosaveName) { center() }
         setFrameAutosaveName(Self.autosaveName)
