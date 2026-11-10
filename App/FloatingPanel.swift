@@ -15,7 +15,6 @@ final class FloatingPanel: NSPanel {
         title = "Windows"
         PanelStyle.apply(to: self)
         becomesKeyOnlyIfNeeded = true
-        titlebarAppearsTransparent = true
         isMovableByWindowBackground = true
         isReleasedWhenClosed = false
         minSize = NSSize(width: 200, height: 160)
@@ -24,6 +23,7 @@ final class FloatingPanel: NSPanel {
         background.material = .menu
         background.blendingMode = .behindWindow
         background.state = .active
+        background.maskImage = PanelStyle.cornerMask()
         let hosting = NSHostingView(rootView: content)
         // The panel's height follows the content through `PanelFrame.fit`; SwiftUI's default min/ideal/max size
         // constraints would otherwise force it, e.g. to the wrapped permission text's height at zero width.

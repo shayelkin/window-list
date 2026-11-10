@@ -3,7 +3,7 @@ import WindowListCore
 
 struct WindowListView: View {
     let model: WindowListModel
-    /// Reports the height the content needs below the titlebar.
+    /// Reports the height the content needs.
     let onContentHeight: (CGFloat) -> Void
 
     var body: some View {
