@@ -25,6 +25,9 @@ final class FloatingPanel: NSPanel {
         background.blendingMode = .behindWindow
         background.state = .active
         let hosting = NSHostingView(rootView: content)
+        // The panel's height follows the content through `PanelFrame.fit`; SwiftUI's default min/ideal/max size
+        // constraints would otherwise force it, e.g. to the wrapped permission text's height at zero width.
+        hosting.sizingOptions = []
         hosting.translatesAutoresizingMaskIntoConstraints = false
         background.addSubview(hosting)
         NSLayoutConstraint.activate([
