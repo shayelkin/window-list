@@ -1,6 +1,6 @@
 name: WindowList
 options:
-  bundleIdPrefix: io.elkin
+  bundleIdPrefix: com.shayelkin
   deploymentTarget:
     macOS: "26.0"
   createIntermediateGroups: true
@@ -32,7 +32,7 @@ targets:
         NSPrincipalClass: NSApplication
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: io.elkin.WindowList
+        PRODUCT_BUNDLE_IDENTIFIER: com.shayelkin.WindowList
         ENABLE_HARDENED_RUNTIME: YES
         ENABLE_APP_SANDBOX: NO
         CODE_SIGN_IDENTITY: "-"
