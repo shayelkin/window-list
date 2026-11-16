@@ -1,5 +1,6 @@
 import AppKit
 import SwiftUI
+import WindowListCore
 
 /// A menu-item-style row: icon and title, with the accent-colored highlight menus use under the pointer.
 struct WindowRow: View {
@@ -8,6 +9,7 @@ struct WindowRow: View {
     let isHighlighted: Bool
     let onHover: (Bool) -> Void
     let onActivate: () -> Void
+    let onMenuAction: (WindowMenuAction) -> Void
 
     var body: some View {
         HStack(spacing: 6) {
@@ -35,5 +37,10 @@ struct WindowRow: View {
         .contentShape(Rectangle())
         .onHover(perform: onHover)
         .onTapGesture(perform: onActivate)
+        .contextMenu {
+            ForEach(WindowMenuAction.allCases, id: \.self) { action in
+                Button(action.title) { onMenuAction(action) }
+            }
+        }
     }
 }

@@ -235,6 +235,96 @@ extension LiveAXTests {
                 }
             }
         }
+
+        @Test func closeRemovesChosenWindow() async throws {
+            try Live.requireTrust()
+            let fixture = try Fixture()
+            defer { fixture.terminate() }
+            let enumerator = WindowEnumerator()
+            let input = zip(Live.nonEmptyTitle.array(of: 2...4), Gen.int(in: 0...3))
+            await propertyCheck(count: 10, input: input) { titles, choice in
+                await Live.failOnThrow {
+                    let opened = try titles.map { try fixture.open(title: $0) }
+                    defer { opened.forEach { try? fixture.close($0) } }
+                    let target = try #require(
+                        opened.isEmpty ? nil : opened[choice % opened.count],
+                        "shrinking may drop below the generator's 2 titles; got \(titles)")
+                    let entries = await Live.eventually(
+                        { await Live.entries(of: fixture, in: enumerator) },
+                        until: { Set($0.map(\.id)).isSuperset(of: opened) }
+                    )
+                    let entry = try #require(
+                        entries.first { $0.id == target }, "\(target) must be listed before closing")
+                    try await WindowCloser.close(entry)
+                    let remaining = await Live.eventually(
+                        { Set(await Live.entries(of: fixture, in: enumerator).map(\.id)) },
+                        until: { !$0.contains(target) }
+                    )
+                    #expect(!remaining.contains(target), "closed window \(target) must not be listed; got \(remaining)")
+                }
+            }
+        }
+
+        @Test func closeKeepsOtherWindows() async throws {
+            try Live.requireTrust()
+            let fixture = try Fixture()
+            defer { fixture.terminate() }
+            let enumerator = WindowEnumerator()
+            let input = zip(Live.nonEmptyTitle.array(of: 2...4), Gen.int(in: 0...3))
+            await propertyCheck(count: 10, input: input) { titles, choice in
+                await Live.failOnThrow {
+                    let opened = try titles.map { try fixture.open(title: $0) }
+                    defer { opened.forEach { try? fixture.close($0) } }
+                    let target = try #require(
+                        opened.isEmpty ? nil : opened[choice % opened.count],
+                        "shrinking may drop below the generator's 2 titles; got \(titles)")
+                    let entries = await Live.eventually(
+                        { await Live.entries(of: fixture, in: enumerator) },
+                        until: { Set($0.map(\.id)).isSuperset(of: opened) }
+                    )
+                    let entry = try #require(
+                        entries.first { $0.id == target }, "\(target) must be listed before closing")
+                    try await WindowCloser.close(entry)
+                    let others = Set(opened).subtracting([target])
+                    let remaining = await Live.eventually(
+                        { Set(await Live.entries(of: fixture, in: enumerator).map(\.id)) },
+                        until: { !$0.contains(target) }
+                    )
+                    #expect(
+                        others.isSubset(of: remaining),
+                        "closing \(target) must keep \(others) listed; got \(remaining)")
+                }
+            }
+        }
+
+        @Test func closeRemovesMinimizedWindow() async throws {
+            try Live.requireTrust()
+            let fixture = try Fixture()
+            defer { fixture.terminate() }
+            let enumerator = WindowEnumerator()
+            await propertyCheck(count: 5, input: Live.nonEmptyTitle) { title in
+                await Live.failOnThrow {
+                    let window = try fixture.open(title: title)
+                    defer { try? fixture.close(window) }
+                    try fixture.minimize(window)
+                    let entries = await Live.eventually(
+                        { await Live.entries(of: fixture, in: enumerator) },
+                        until: { $0.contains { $0.id == window && $0.isMinimized } }
+                    )
+                    let entry = try #require(
+                        entries.first { $0.id == window && $0.isMinimized }, "\(window) must be listed as minimized"
+                    )
+                    try await WindowCloser.close(entry)
+                    let remaining = await Live.eventually(
+                        { Set(await Live.entries(of: fixture, in: enumerator).map(\.id)) },
+                        until: { !$0.contains(window) }
+                    )
+                    #expect(
+                        !remaining.contains(window),
+                        "closed minimized window \(window) must not be listed; got \(remaining)")
+                }
+            }
+        }
     }
 }
 

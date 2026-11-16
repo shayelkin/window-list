@@ -14,12 +14,13 @@ public enum WindowActivator {
     /// How long an unseen window may take to surface as its app's focused window after being made key.
     public static let focusTimeout: Duration = .seconds(1)
 
-    /// Focuses `entry`'s window, switching Space if needed.
+    /// Focuses `entry`'s window, switching Space if needed, and returns its AX element.
     /// Sequence adapted from AltTab's window focusing (front process + make-key event + AXRaise):
     /// https://github.com/lwouis/alt-tab-macos/blob/ec4f94a8b98a5b9df152af64f74aa4f9f811dd18/src/macos/api-wrappers/SkyLight.framework.swift
     /// The front process + make-key steps only need the window id, which is what makes unseen windows reachable:
     /// once key, the app vends the window as `kAXFocusedWindow`, and `AXRaise` on it switches to its Space.
-    public static func activate(_ entry: WindowEntry) async throws(ActivationError) {
+    @discardableResult
+    public static func activate(_ entry: WindowEntry) async throws(ActivationError) -> AXWindow {
         if case .resolved(let window) = entry.access, entry.isMinimized {
             do throws(AXFailure) {
                 try window.element.set(kAXMinimizedAttribute, to: false)
@@ -49,6 +50,7 @@ public enum WindowActivator {
         } catch {
             throw .raiseFailed(error)
         }
+        return window
     }
 
     /// Public-API fallback: activates the app, then raises the window when its element is known.

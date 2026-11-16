@@ -29,7 +29,8 @@ struct WindowListView: View {
                             icon: model.icon(for: entry.process),
                             isHighlighted: model.highlight.id == entry.id,
                             onHover: { inside in hover(entry.id, inside: inside) },
-                            onActivate: { model.activate(entry.id) }
+                            onActivate: { model.activate(entry.id) },
+                            onMenuAction: { action in model.perform(action, on: entry.id) }
                         )
                     }
                 }

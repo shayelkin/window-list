@@ -1,4 +1,5 @@
 import AppKit
+import OSLog
 import Observation
 
 @MainActor
@@ -89,6 +90,25 @@ public final class WindowListModel {
                 WindowActivator.activateFallback(entry)
             }
             self?.refresh()
+        }
+    }
+
+    public func close(_ id: WindowID) {
+        guard let entry = entries.first(where: { $0.id == id }) else { return }
+        Task { [weak self] in
+            do throws(CloseError) {
+                try await WindowCloser.close(entry)
+            } catch {
+                Logger().error("Could not close window \(id.rawValue): \(String(describing: error), privacy: .public)")
+            }
+            self?.refresh()
+        }
+    }
+
+    public func perform(_ action: WindowMenuAction, on id: WindowID) {
+        switch action {
+        case .switchTo: activate(id)
+        case .close: close(id)
         }
     }
 

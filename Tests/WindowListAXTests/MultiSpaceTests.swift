@@ -141,6 +141,26 @@ extension LiveAXTests {
             }
         }
 
+        func closeAndExpectRemoval(_ exposure: Exposure) async {
+            await propertyCheck(count: 3, input: Live.nonEmptyTitle) { title in
+                await Live.failOnThrow {
+                    try await withOtherSpaceWindow(title: title, exposure: exposure) { scenario in
+                        try await WindowCloser.close(try await entry(for: scenario))
+                        let enumerator = WindowEnumerator(bruteForceBudget: .seconds(2))
+                        let remaining = await Live.eventually(
+                            { Set(await Live.entries(of: scenario.fixture, in: enumerator).map(\.id)) },
+                            until: { !$0.contains(scenario.window) }
+                        )
+                        #expect(
+                            !remaining.contains(scenario.window),
+                            "closing \(exposure) window \(scenario.window) must remove it from the list; got \(remaining)"
+                        )
+                        try? await Task.sleep(for: Spaces.settleTime)
+                    }
+                }
+            }
+        }
+
         @Test func configuredMoveLeftHotKeyIsReadable() {
             let result = SymbolicHotKey.read(.moveLeft)
             #expect(
@@ -375,5 +395,7 @@ extension LiveAXTests {
         @Test func activateFocusesListedWindow() async { await activateAndExpectFocus(.listed) }
         @Test func activateSwitchesToUnseenWindowSpace() async { await activateAndExpectSpaceSwitch(.unseen) }
         @Test func activateFocusesUnseenWindow() async { await activateAndExpectFocus(.unseen) }
+        @Test func closeRemovesListedWindow() async { await closeAndExpectRemoval(.listed) }
+        @Test func closeRemovesUnseenWindow() async { await closeAndExpectRemoval(.unseen) }
     }
 }
