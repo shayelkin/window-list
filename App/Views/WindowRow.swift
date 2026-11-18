@@ -23,7 +23,7 @@ struct WindowRow: View {
             .frame(width: 18, height: 18)
             Text(title)
                 .lineLimit(1)
-                .truncationMode(.middle)
+                .truncationMode(.tail)
             Spacer(minLength: 0)
         }
         .padding(.horizontal, 8)
