@@ -1,4 +1,4 @@
-.PHONY: debug test release test-skip-liveax clean
+.PHONY: debug lint test release test-skip-liveax clean
 
 XCODEPROJ := WindowList.xcodeproj/project.pbxproj
 PRODUCTS := .build/xcode/Build/Products
@@ -14,10 +14,13 @@ debug: $(DEBUG_BIN)
 
 release: $(APP_BUNDLE)
 
-test:
+lint:
+	xcrun swift-format lint --strict -r App Sources Tests
+
+test: lint
 	swift test
 
-test-skip-liveax:
+test-skip-liveax: lint
 	swift test --skip LiveAXTests
 
 clean:
