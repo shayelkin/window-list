@@ -13,8 +13,9 @@ public enum HotKeyError: Error, Equatable, Sendable {
 public struct HotKeyCombination: Equatable, Sendable, CustomStringConvertible {
     public static let supportedModifiers: NSEvent.ModifierFlags = [.command, .control, .option, .shift]
     /// Ctrl+Cmd+B: show or hide the window list.
-    public static let toggleList = Self(validKeyCode: CGKeyCode(kVK_ANSI_B),
-                                        modifiers: [.command, .control])
+    public static let toggleList = Self(
+        validKeyCode: CGKeyCode(kVK_ANSI_B),
+        modifiers: [.command, .control])
 
     public let keyCode: CGKeyCode
     public let modifiers: NSEvent.ModifierFlags
