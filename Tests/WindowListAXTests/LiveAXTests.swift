@@ -95,7 +95,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             let appName = Live.appName(of: fixture)
             await propertyCheck(count: 10, input: Live.title.array(of: 1...5)) { titles in
                 await Live.failOnThrow {
@@ -115,7 +115,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             let side = Gen.double(in: 10...(WindowBounds.minimumSide - 1))
             await propertyCheck(count: 10, input: Live.nonEmptyTitle, side, Live.nonEmptyTitle) { tiny, side, normal in
                 await Live.failOnThrow {
@@ -136,7 +136,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             await propertyCheck(count: 5, input: Live.nonEmptyTitle, Live.nonEmptyTitle) { first, second in
                 await Live.failOnThrow {
                     let minimized = try fixture.open(title: first)
@@ -158,7 +158,7 @@ extension LiveAXTests {
 
         @Test func snapshotDropsTerminatedProcess() async throws {
             try Live.requireTrust()
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             await propertyCheck(count: 3, input: Live.nonEmptyTitle) { title in
                 await Live.failOnThrow {
                     let fixture = try Fixture()
@@ -181,7 +181,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             let input = zip(Live.nonEmptyTitle.array(of: 2...4), Gen.int(in: 0...3))
             await propertyCheck(count: 10, input: input) { titles, choice in
                 await Live.failOnThrow {
@@ -213,7 +213,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             await propertyCheck(count: 5, input: Live.nonEmptyTitle) { title in
                 await Live.failOnThrow {
                     let window = try fixture.open(title: title)
@@ -240,7 +240,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             let input = zip(Live.nonEmptyTitle.array(of: 2...4), Gen.int(in: 0...3))
             await propertyCheck(count: 10, input: input) { titles, choice in
                 await Live.failOnThrow {
@@ -269,7 +269,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             let input = zip(Live.nonEmptyTitle.array(of: 2...4), Gen.int(in: 0...3))
             await propertyCheck(count: 10, input: input) { titles, choice in
                 await Live.failOnThrow {
@@ -301,7 +301,7 @@ extension LiveAXTests {
             try Live.requireTrust()
             let fixture = try Fixture()
             defer { fixture.terminate() }
-            let enumerator = WindowEnumerator()
+            let enumerator = Live.defaultEnumerator
             await propertyCheck(count: 5, input: Live.nonEmptyTitle) { title in
                 await Live.failOnThrow {
                     let window = try fixture.open(title: title)

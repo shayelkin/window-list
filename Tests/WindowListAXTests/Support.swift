@@ -8,6 +8,15 @@ import WindowListCore
 enum Live {
     static let timeout: Duration = .seconds(5)
 
+    /// A sweep covers about 50 000 element ids per second and finds a fixture's windows below id 50, so a miss
+    /// within this budget has covered the id range a hit would lie in a thousand times over.
+    static let sweepBudget: Duration = .seconds(1)
+
+    /// Shared like the app's single enumerator: its cache spares every test the cold snapshot, which sweeps each
+    /// other app's windows for the whole budget. Fixture windows are new per test, so tests stay independent.
+    static let defaultEnumerator = WindowEnumerator()
+    static let sweepingEnumerator = WindowEnumerator(bruteForceBudget: sweepBudget)
+
     /// swift-property-based 2.0.1 discards errors thrown by a `propertyCheck` body (`try?` in IssueCounting.swift), so
     /// only recorded issues fail a check. Bodies that can throw run through this so a thrown error fails the test.
     static func failOnThrow(
@@ -52,7 +61,7 @@ enum Live {
         let deadline = clock.now.advanced(by: timeout)
         var value = try await produce()
         while !accept(value), clock.now < deadline {
-            try? await Task.sleep(for: .milliseconds(100))
+            try? await Task.sleep(for: .milliseconds(25))
             value = try await produce()
         }
         return value

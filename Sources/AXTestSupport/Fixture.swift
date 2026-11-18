@@ -31,11 +31,16 @@ public final class Fixture {
 
     public static let replyTimeout: Duration = .seconds(10)
 
+    /// How long a terminated fixture may take to exit before it is killed.
+    public static let exitTimeout: DispatchTimeInterval = .seconds(5)
+
     public let process: ProcessID
     private let task: Process
+    private let exited: DispatchSemaphore
     private let input: FileHandle
     private let output: FileHandle
     private var buffer = Data()
+    private var isTerminating = false
 
     public static var binaryURL: URL {
         Bundle(for: Fixture.self).bundleURL.deletingLastPathComponent().appending(path: "AXFixture")
@@ -52,6 +57,8 @@ public final class Fixture {
         task.arguments = accessory ? ["--accessory"] : []
         task.standardInput = stdin
         task.standardOutput = stdout
+        let exited = DispatchSemaphore(value: 0)
+        task.terminationHandler = { _ in exited.signal() }
         do {
             try task.run()
         } catch {
@@ -62,6 +69,7 @@ public final class Fixture {
             throw .launchFailed("invalid pid \(task.processIdentifier)")
         }
         self.task = task
+        self.exited = exited
         self.process = process
         self.input = stdin.fileHandleForWriting
         self.output = stdout.fileHandleForReading
@@ -107,9 +115,12 @@ public final class Fixture {
     }
 
     public func terminate() {
-        guard task.isRunning else { return }
+        guard !isTerminating, task.isRunning else { return }
+        isTerminating = true
         task.terminate()
-        task.waitUntilExit()
+        guard exited.wait(timeout: .now() + Self.exitTimeout) == .timedOut else { return }
+        kill(task.processIdentifier, SIGKILL)
+        _ = exited.wait(timeout: .now() + Self.exitTimeout)
     }
 
     private struct Reply: Decodable {

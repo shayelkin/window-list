@@ -93,7 +93,7 @@ extension LiveAXTests {
         }
 
         func entry(for scenario: Scenario) async throws -> WindowEntry {
-            let enumerator = WindowEnumerator(bruteForceBudget: .seconds(5))
+            let enumerator = Live.sweepingEnumerator
             let entries = await Live.eventually(
                 { await Live.entries(of: scenario.fixture, in: enumerator) },
                 until: { $0.contains { $0.id == scenario.window } }
@@ -146,7 +146,7 @@ extension LiveAXTests {
                 await Live.failOnThrow {
                     try await withOtherSpaceWindow(title: title, exposure: exposure) { scenario in
                         try await WindowCloser.close(try await entry(for: scenario))
-                        let enumerator = WindowEnumerator(bruteForceBudget: .seconds(2))
+                        let enumerator = Live.sweepingEnumerator
                         let remaining = await Live.eventually(
                             { Set(await Live.entries(of: scenario.fixture, in: enumerator).map(\.id)) },
                             until: { !$0.contains(scenario.window) }
@@ -200,7 +200,7 @@ extension LiveAXTests {
                 await Live.failOnThrow {
                     try await withOtherSpaceWindow(title: title, exposure: .unseen) { scenario in
                         let found = WindowEnumerator.bruteForce(
-                            process: scenario.fixture.process, wanted: [scenario.window], budget: .seconds(2)
+                            process: scenario.fixture.process, wanted: [scenario.window], budget: Live.sweepBudget
                         ).found
                         #expect(
                             found.isEmpty,
@@ -281,7 +281,7 @@ extension LiveAXTests {
                             placement == [scenario.other],
                             "ordered-out window \(scenario.window) must keep reporting \(scenario.other) (like apps' hidden windows); got \(placement)"
                         )
-                        let enumerator = WindowEnumerator(bruteForceBudget: .seconds(2))
+                        let enumerator = Live.sweepingEnumerator
                         let entries = await Live.entries(of: scenario.fixture, in: enumerator)
                         #expect(
                             !entries.contains { $0.id == scenario.window },

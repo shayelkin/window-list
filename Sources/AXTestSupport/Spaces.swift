@@ -65,8 +65,9 @@ public enum SpacesError: Error, CustomStringConvertible {
 
 public enum Spaces {
     public static let switchTimeout: Duration = .seconds(3)
-    /// Time for the Space-switch animation to finish before the next switch or window operation.
-    public static let settleTime: Duration = .milliseconds(900)
+    /// Time for windows to settle once the window server reports the new active Space, which it does only after the
+    /// switch animation has finished.
+    public static let settleTime: Duration = .milliseconds(100)
 
     private static var mainDisplayIdentifier: String? {
         guard let uuid = CGDisplayCreateUUIDFromDisplayID(CGMainDisplayID())?.takeRetainedValue() else {

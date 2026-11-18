@@ -54,6 +54,15 @@ extension LiveAXTests {
             }
         }
 
+        /// Pumps until `delivered` holds (at most `limit`), then keeps pumping for `grace` so extra deliveries show up.
+        func pump(until delivered: () -> Bool, grace: Duration = .milliseconds(300), limit: Duration = .seconds(2)) {
+            let deadline = ContinuousClock.now.advanced(by: limit)
+            while !delivered(), ContinuousClock.now < deadline {
+                pump(for: .milliseconds(10))
+            }
+            pump(for: grace)
+        }
+
         @Test func eachPressRunsActionOnce() async {
             await propertyCheck(count: 5, input: presses) { count in
                 await Live.failOnThrow {
@@ -61,7 +70,7 @@ extension LiveAXTests {
                     let counter = Counter()
                     let hotKey = try register(.toggleList, counter)
                     try (0..<count).forEach { _ in try press(.toggleList) }
-                    pump(for: .seconds(1))
+                    pump(until: { counter.count >= count })
                     #expect(counter.count == count, "\(count) presses of ⌃⌘B must run the action \(count) times")
                     withExtendedLifetime(hotKey) {}
                 }
@@ -77,7 +86,7 @@ extension LiveAXTests {
                     let hotKeys = try [register(.toggleList, toggle), register(Self.other, other)]
                     let pressed = pressToggle ? HotKeyCombination.toggleList : Self.other
                     try press(pressed)
-                    pump(for: .seconds(1))
+                    pump(until: { toggle.count + other.count >= 1 })
                     #expect(
                         (toggle.count, other.count) == (pressToggle ? (1, 0) : (0, 1)),
                         "pressing \(pressed) must run only its own action; ran ⌃⌘B \(toggle.count), ⌃⇧⌘B \(other.count)"
