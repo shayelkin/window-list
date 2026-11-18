@@ -8,9 +8,10 @@ SwiftPM package (`Sources/WindowListCore`); `App/` is a thin XcodeGen shell.
 ## Commands
 
 - Lint: `xcrun swift-format lint --strict -r App Sources Tests` (format with `xcrun swift-format format -i -r …`)
-- Tests: `swift test` (pure suites take about 1 s; the live AX suites take about 2.5 min)
-- Pure tests only: `swift test --skip LiveAXTests`
-- App: `xcodegen generate && xcodebuild -project WindowList.xcodeproj -scheme WindowList -destination 'platform=macOS' -derivedDataPath .build/xcode build`
+- Tests: `make test` (pure suites take about 1 s; the live AX suites take about 2.5 min)
+- Pure tests only: `make test-skip-liveax`
+- Build: `make debug` (runs `xcodegen` when needed)
+- Build a release version: `make release` copies the app to `bin/WindowList.app`
 
 ## Live AX tests (`Tests/WindowListAXTests`)
 
