@@ -37,4 +37,5 @@ $(RELEASE_BIN): $(APP_INPUTS) $(XCODEPROJ)
 
 $(APP_BUNDLE): $(RELEASE_BIN)
 	mkdir bin | true
+	rm -rf $(APP_BUNDLE)
 	cp -R $(PRODUCTS)/Release/WindowList.app $(APP_BUNDLE)
